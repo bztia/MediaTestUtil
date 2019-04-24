@@ -1,6 +1,9 @@
 package com.agora.mediatest.util;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
@@ -21,7 +24,7 @@ import java.util.List;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class FullscreenActivity extends AppCompatActivity implements View.OnTouchListener {
+public class MediaTestUtilActivity extends AppCompatActivity implements View.OnTouchListener {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -106,36 +109,8 @@ public class FullscreenActivity extends AppCompatActivity implements View.OnTouc
     private int _xDelta;
     private int _yDelta;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_fullscreen);
-
-        mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.fullscreen_content);
-        mTimerText = findViewById(R.id.text_timer);
-        mTimerText.setOnTouchListener(this);
-        mIpAddressButton = findViewById(R.id.btn_ip4_address);
-
-
-        // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        mIpAddressButton.setText(getWlanIpAddress());
-        mIpAddressButton.setOnTouchListener(mDelayHideTouchListener);
-
-        mTimerHandler.postDelayed(mTimerUpdateRunable, 1);
-    }
+    Intent mServiceIntent;
+    Context mContext;
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -238,5 +213,59 @@ public class FullscreenActivity extends AppCompatActivity implements View.OnTouc
         }
         mContentView.invalidate();
         return true;
+    }
+
+    private TimeSyncService mTimeSyncService;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mContext = this;
+
+        setContentView(R.layout.activity_fullscreen);
+
+        mVisible = true;
+        mControlsView = findViewById(R.id.fullscreen_content_controls);
+        mContentView = findViewById(R.id.fullscreen_content);
+        mTimerText = findViewById(R.id.text_timer);
+        mTimerText.setOnTouchListener(this);
+        mIpAddressButton = findViewById(R.id.btn_ip4_address);
+
+
+        // Set up the user interaction to manually show or hide the system UI.
+        mContentView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggle();
+            }
+        });
+
+        // Upon interacting with UI controls, delay any scheduled hide()
+        // operations to prevent the jarring behavior of controls going away
+        // while interacting with the UI.
+        mIpAddressButton.setOnTouchListener(mDelayHideTouchListener);
+
+        mTimerHandler.postDelayed(mTimerUpdateRunable, 1);
+
+        mTimeSyncService = new TimeSyncService(getContext());
+        mServiceIntent = new Intent(getContext(), mTimeSyncService.getClass());
+        if (!isTimeSyncServiceRunning(mServiceIntent.getClass())) {
+            startService(mServiceIntent);
+        }
+    }
+
+    private boolean isTimeSyncServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Context getContext() {
+        return mContext;
     }
 }
