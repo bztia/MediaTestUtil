@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MediaTestUtil</string>
+    <string name="dummy_content">8888888888.888</string>
+</resources>
