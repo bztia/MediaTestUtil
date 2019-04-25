@@ -6,6 +6,8 @@ import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +22,8 @@ import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+
+import static android.view.View.FOCUS_LEFT;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -98,15 +102,10 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
         }
     };
     private Button mIpAddressButton;
-    private Runnable mTimerUpdateRunable = new Runnable() {
-
-        public void run() {
-            long current = System.currentTimeMillis();
-            mTimerText.setText(String.format("%.3f\n%.3f", current / 1000.0, current / 1000.0));
-            mTimerHandler.postDelayed(this, 0);
-        }
-
-    };
+    //private static final String IMAGE_URL = "http://fansart.com/upload1/20171210/1512861746-0.jpg";
+    //private static final String IMAGE_URL = "http://www.myjscode.com/images/earth1.jpg";
+    //private static final String IMAGE_URL = "http://cons452.sites.olt.ubc.ca/files/2013/12/Colour_World_Banner-with-Credits-black.png";
+    private static final String IMAGE_URL = "https://sum4all.org/data/files/styles/top_banner/public/page/banner/colour_world_banner.png";
     private int _xDelta;
     private int _yDelta;
 
@@ -215,6 +214,21 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
 
     private OneTimeWorkRequest mWorkRequest = null;
     private boolean mWorkerStatus = true;
+    private ImageView mImage = null;
+    private HorizontalScrollView mHorizonalScrollView = null;
+    private Runnable mTimerUpdateRunable = new Runnable() {
+
+        public void run() {
+            long current = System.currentTimeMillis();
+            mTimerText.setText(String.format("%.3f\n%.3f", current / 1000.0, current / 1000.0));
+            mTimerHandler.postDelayed(this, 0);
+            int cur_x = mHorizonalScrollView.getScrollX();
+            int max_x = mHorizonalScrollView.getChildAt(0).getMeasuredWidth() - mHorizonalScrollView.getMeasuredWidth();
+            if (cur_x >= max_x) mHorizonalScrollView.fullScroll(FOCUS_LEFT);
+            mHorizonalScrollView.smoothScrollBy(20, 0);
+        }
+
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -223,6 +237,7 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
         setContentView(R.layout.activity_fullscreen);
 
         mVisible = true;
+        mHorizonalScrollView = findViewById(R.id.horizontal_view);
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
         mTimerText = findViewById(R.id.text_timer);
@@ -247,7 +262,14 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
         });
 
         // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
+        mImage = findViewById(R.id.img_scroll);
+        mImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggle();
+            }
+        });
+        mHorizonalScrollView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 toggle();
@@ -260,5 +282,9 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
         mIpAddressButton.setOnTouchListener(mDelayHideTouchListener);
 
         mTimerHandler.postDelayed(mTimerUpdateRunable, 1);
+
+        //call asynctask to get image from url
+        new DownloadImageTask(mImage).execute(IMAGE_URL);
+
     }
 }
