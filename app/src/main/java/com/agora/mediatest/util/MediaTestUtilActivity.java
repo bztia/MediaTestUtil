@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -212,6 +213,9 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
         return true;
     }
 
+    private OneTimeWorkRequest mWorkRequest = null;
+    private boolean mWorkerStatus = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -223,8 +227,24 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
         mContentView = findViewById(R.id.fullscreen_content);
         mTimerText = findViewById(R.id.text_timer);
         mTimerText.setOnTouchListener(this);
-        mIpAddressButton = findViewById(R.id.btn_ip4_address);
 
+        mWorkRequest = new OneTimeWorkRequest.Builder(TimeSyncWorker.class).build();
+        WorkManager.getInstance().enqueue(mWorkRequest);
+
+        mIpAddressButton = findViewById(R.id.btn_ip4_address);
+        mIpAddressButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mWorkerStatus = TimeSyncWorker.closeServer();
+                if (mWorkerStatus) {
+                    Toast.makeText(getApplicationContext(), "TimeSyncService restarted!", Toast.LENGTH_SHORT).show();
+                    mWorkRequest = new OneTimeWorkRequest.Builder(TimeSyncWorker.class).build();
+                    WorkManager.getInstance().enqueue(mWorkRequest);
+                } else {
+                    Toast.makeText(getApplicationContext(), "TimeSyncService closed!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {
@@ -240,9 +260,5 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
         mIpAddressButton.setOnTouchListener(mDelayHideTouchListener);
 
         mTimerHandler.postDelayed(mTimerUpdateRunable, 1);
-
-        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(TimeSyncWorker.class).build();
-        WorkManager.getInstance().cancelAllWork();
-        WorkManager.getInstance().enqueue(workRequest);
     }
 }
