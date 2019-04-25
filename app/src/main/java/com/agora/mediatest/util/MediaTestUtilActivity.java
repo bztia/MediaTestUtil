@@ -1,18 +1,18 @@
 package com.agora.mediatest.util;
 
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -108,9 +108,6 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
     };
     private int _xDelta;
     private int _yDelta;
-
-    Intent mServiceIntent;
-    Context mContext;
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -215,13 +212,9 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
         return true;
     }
 
-    private TimeSyncService mTimeSyncService;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mContext = this;
 
         setContentView(R.layout.activity_fullscreen);
 
@@ -248,24 +241,8 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
 
         mTimerHandler.postDelayed(mTimerUpdateRunable, 1);
 
-        mTimeSyncService = new TimeSyncService(getContext());
-        mServiceIntent = new Intent(getContext(), mTimeSyncService.getClass());
-        if (!isTimeSyncServiceRunning(mServiceIntent.getClass())) {
-            startService(mServiceIntent);
-        }
-    }
-
-    private boolean isTimeSyncServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public Context getContext() {
-        return mContext;
+        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(TimeSyncWorker.class).build();
+        WorkManager.getInstance().cancelAllWork();
+        WorkManager.getInstance().enqueue(workRequest);
     }
 }
