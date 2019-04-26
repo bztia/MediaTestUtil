@@ -153,7 +153,7 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
                     if (inetAddress.isSiteLocalAddress()) {
                         String sAddr = inetAddress.getHostAddress();
                         boolean isIPv4 = sAddr.indexOf(':') < 0;
-                        return sAddr;
+                        if (isIPv4) return sAddr;
                     }
                 }
             }
@@ -263,13 +263,8 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
 
         // Set up the user interaction to manually show or hide the system UI.
         mImage = findViewById(R.id.img_scroll);
+        mImage.setImageResource(R.drawable.background);
         mImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
-        mHorizonalScrollView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 toggle();
@@ -282,9 +277,5 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
         mIpAddressButton.setOnTouchListener(mDelayHideTouchListener);
 
         mTimerHandler.postDelayed(mTimerUpdateRunable, 1);
-
-        //call asynctask to get image from url
-        new DownloadImageTask(mImage).execute(IMAGE_URL);
-
     }
 }
