@@ -220,7 +220,13 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
 
         public void run() {
             long current = System.currentTimeMillis();
-            mTimerText.setText(String.format("%.3f\n%.3f", current / 1000.0, current / 1000.0));
+            long current_plus_111 = current + 111;
+            long current_plus_222 = current + 222;
+
+            mTimerText.setText(String.format("%05d\n%05d\n%05d",
+                    current % 100000,
+                    current_plus_111 % 100000,
+                    current_plus_222 % 100000));
             mTimerHandler.postDelayed(this, 0);
             int cur_x = mHorizonalScrollView.getScrollX();
             int max_x = mHorizonalScrollView.getChildAt(0).getMeasuredWidth() - mHorizonalScrollView.getMeasuredWidth();

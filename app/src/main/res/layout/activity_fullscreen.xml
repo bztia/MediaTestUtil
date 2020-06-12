@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -20,10 +21,10 @@
 
             <ImageView
                 android:id="@+id/img_scroll"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:adjustViewBounds="true"
-                android:contentDescription="TODO"
+                android:contentDescription="@string/alter_text_background"
                 android:scaleType="fitStart" />
         </HorizontalScrollView>
 
@@ -31,8 +32,12 @@
             android:id="@+id/text_timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
+            android:background="@drawable/border_5dp"
             android:keepScreenOn="true"
+            android:paddingLeft="?attr/dialogPreferredPadding"
+            android:paddingTop="?attr/dialogPreferredPadding"
+            android:paddingRight="?attr/dialogPreferredPadding"
+            android:paddingBottom="?attr/dialogPreferredPadding"
             android:text="@string/dummy_content"
             android:textColor="@android:color/black"
             android:textSize="40sp"
