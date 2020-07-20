@@ -215,23 +215,36 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
     private OneTimeWorkRequest mWorkRequest = null;
     private boolean mWorkerStatus = true;
     private ImageView mImage = null;
-    private HorizontalScrollView mHorizonalScrollView = null;
+    private HorizontalScrollView mHorizontalScrollView = null;
+
+    private long digit_plus_one_encoder(long ts) {
+        long weight = 1;
+        long encoded_int = 0;
+
+        while (ts > 0) {
+            encoded_int += ((ts + 1) % 10) * weight;
+            weight *= 10;
+            ts /= 10;
+        }
+        return encoded_int;
+    }
+
     private Runnable mTimerUpdateRunable = new Runnable() {
 
         public void run() {
             long current = System.currentTimeMillis();
-            long current_plus_111 = current + 111;
-            long current_plus_222 = current + 222;
+            long digits_plus_1 = digit_plus_one_encoder(current);
+            long digits_plus_2 = digit_plus_one_encoder(digits_plus_1);
 
             mTimerText.setText(String.format("%05d\n%05d\n%05d",
                     current % 100000,
-                    current_plus_111 % 100000,
-                    current_plus_222 % 100000));
+                    digits_plus_1 % 100000,
+                    digits_plus_2 % 100000));
             mTimerHandler.postDelayed(this, 0);
-            int cur_x = mHorizonalScrollView.getScrollX();
-            int max_x = mHorizonalScrollView.getChildAt(0).getMeasuredWidth() - mHorizonalScrollView.getMeasuredWidth();
-            if (cur_x >= max_x) mHorizonalScrollView.fullScroll(FOCUS_LEFT);
-            mHorizonalScrollView.smoothScrollBy(20, 0);
+            int cur_x = mHorizontalScrollView.getScrollX();
+            int max_x = mHorizontalScrollView.getChildAt(0).getMeasuredWidth() - mHorizontalScrollView.getMeasuredWidth();
+            if (cur_x >= max_x) mHorizontalScrollView.fullScroll(FOCUS_LEFT);
+            mHorizontalScrollView.smoothScrollBy(20, 0);
         }
 
     };
@@ -243,7 +256,7 @@ public class MediaTestUtilActivity extends AppCompatActivity implements View.OnT
         setContentView(R.layout.activity_fullscreen);
 
         mVisible = true;
-        mHorizonalScrollView = findViewById(R.id.horizontal_view);
+        mHorizontalScrollView = findViewById(R.id.horizontal_view);
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
         mTimerText = findViewById(R.id.text_timer);
